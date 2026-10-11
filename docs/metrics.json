@@ -1,0 +1,907 @@
+{
+ "generated_by": "demo.py",
+ "elapsed_seconds": 369.0,
+ "environment": {
+  "python": "3.13.5",
+  "sqlite": "3.49.1",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "stat4_enabled": false
+ },
+ "corpus": {
+  "rows": {
+   "files": 2508,
+   "symbols": 88056,
+   "imports": 19259,
+   "calls": 396850
+  },
+  "total_rows": 506673,
+  "bytes": 36061184,
+  "skew": [
+   {
+    "table": "imports",
+    "column": "target",
+    "rows": 19259,
+    "distinct": 654,
+    "avg_per_value": 29.448012232415902,
+    "max_per_value": 2093,
+    "min_per_value": 1,
+    "singletons": 144,
+    "skew_ratio": 71.07440677086038
+   },
+   {
+    "table": "calls",
+    "column": "func",
+    "rows": 396850,
+    "distinct": 18963,
+    "avg_per_value": 20.927595844539365,
+    "max_per_value": 44875,
+    "min_per_value": 1,
+    "singletons": 5139,
+    "skew_ratio": 2144.297908529671
+   },
+   {
+    "table": "symbols",
+    "column": "name",
+    "rows": 88056,
+    "distinct": 48267,
+    "avg_per_value": 1.8243520417676673,
+    "max_per_value": 2940,
+    "min_per_value": 1,
+    "singletons": 38885,
+    "skew_ratio": 1611.5310711365496
+   },
+   {
+    "table": "symbols",
+    "column": "kind",
+    "rows": 88056,
+    "distinct": 3,
+    "avg_per_value": 29352.0,
+    "max_per_value": 64386,
+    "min_per_value": 7989,
+    "singletons": 0,
+    "skew_ratio": 2.1935813573180702
+   },
+   {
+    "table": "files",
+    "column": "pkg",
+    "rows": 2508,
+    "distinct": 38,
+    "avg_per_value": 66.0,
+    "max_per_value": 1050,
+    "min_per_value": 1,
+    "singletons": 1,
+    "skew_ratio": 15.909090909090908
+   },
+   {
+    "table": "symbols",
+    "column": "nargs",
+    "rows": 88056,
+    "distinct": 25,
+    "avg_per_value": 3522.24,
+    "max_per_value": 45878,
+    "min_per_value": 1,
+    "singletons": 1,
+    "skew_ratio": 13.025233942036886
+   }
+  ]
+ },
+ "workload": {
+  "queries": [
+   {
+    "name": "t1_callfile_hot",
+    "note": "equality on calls.func (hot) plus a range on files.nlines",
+    "tables": [
+     "calls",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, files AS f WHERE c.file_id = f.id AND c.func = 'assertEqual' AND f.nlines > 174"
+   },
+   {
+    "name": "t1_callfile_mid",
+    "note": "equality on calls.func (mid) plus a range on files.nlines",
+    "tables": [
+     "calls",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, files AS f WHERE c.file_id = f.id AND c.func = 'setprofile' AND f.nlines > 174"
+   },
+   {
+    "name": "t1_callfile_rare",
+    "note": "equality on calls.func (rare) plus a range on files.nlines",
+    "tables": [
+     "calls",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, files AS f WHERE c.file_id = f.id AND c.func = '_utc_fold' AND f.nlines > 174"
+   },
+   {
+    "name": "t2_symcall_hot",
+    "note": "two equality predicates on skewed text columns (hot)",
+    "tables": [
+     "symbols",
+     "calls"
+    ],
+    "sql": "SELECT count(*) FROM symbols AS s, calls AS c WHERE c.file_id = s.file_id AND s.name = '__init__' AND c.func = 'assertEqual'"
+   },
+   {
+    "name": "t2_symcall_rare",
+    "note": "two equality predicates on skewed text columns (rare)",
+    "tables": [
+     "symbols",
+     "calls"
+    ],
+    "sql": "SELECT count(*) FROM symbols AS s, calls AS c WHERE c.file_id = s.file_id AND s.name = 'test_awaits_asserts_with_spec_and_any' AND c.func = '_utc_fold'"
+   },
+   {
+    "name": "t3_impfile_hot",
+    "note": "equality on imports.target (hot) plus files.pkg",
+    "tables": [
+     "imports",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM imports AS i, files AS f WHERE i.file_id = f.id AND i.target = 'pip' AND f.pkg = 'test'"
+   },
+   {
+    "name": "t3_impfile_mid",
+    "note": "equality on imports.target (mid) plus files.pkg",
+    "tables": [
+     "imports",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM imports AS i, files AS f WHERE i.file_id = f.id AND i.target = 'json' AND f.pkg = 'test'"
+   },
+   {
+    "name": "t3_impfile_rare",
+    "note": "equality on imports.target (rare) plus files.pkg",
+    "tables": [
+     "imports",
+     "files"
+    ],
+    "sql": "SELECT count(*) FROM imports AS i, files AS f WHERE i.file_id = f.id AND i.target = 'inspect_fodder3' AND f.pkg = 'test'"
+   },
+   {
+    "name": "t4_three_hot",
+    "note": "three way join, equality on imports.target (hot)",
+    "tables": [
+     "symbols",
+     "files",
+     "imports"
+    ],
+    "sql": "SELECT count(*) FROM symbols AS s, files AS f, imports AS i WHERE s.file_id = f.id AND i.file_id = f.id AND s.kind = 'method' AND s.nargs = 1 AND i.target = 'pip'"
+   },
+   {
+    "name": "t4_three_rare",
+    "note": "three way join, equality on imports.target (rare)",
+    "tables": [
+     "symbols",
+     "files",
+     "imports"
+    ],
+    "sql": "SELECT count(*) FROM symbols AS s, files AS f, imports AS i WHERE s.file_id = f.id AND i.file_id = f.id AND s.kind = 'method' AND s.nargs = 1 AND i.target = 'inspect_fodder3'"
+   },
+   {
+    "name": "t5_callimp_hot",
+    "note": "two large tables joined on file_id (hot)",
+    "tables": [
+     "calls",
+     "imports"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, imports AS i WHERE c.file_id = i.file_id AND c.func = 'assertEqual' AND i.target = 'pip'"
+   },
+   {
+    "name": "t5_callimp_rare",
+    "note": "two large tables joined on file_id (rare)",
+    "tables": [
+     "calls",
+     "imports"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, imports AS i WHERE c.file_id = i.file_id AND c.func = '_utc_fold' AND i.target = 'inspect_fodder3'"
+   },
+   {
+    "name": "t5_callimp_mixed",
+    "note": "two large tables joined on file_id (mixed)",
+    "tables": [
+     "calls",
+     "imports"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, imports AS i WHERE c.file_id = i.file_id AND c.func = 'assertEqual' AND i.target = 'inspect_fodder3'"
+   },
+   {
+    "name": "t6_three_mid",
+    "note": "three way join over calls and symbols (mid)",
+    "tables": [
+     "calls",
+     "files",
+     "symbols"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, files AS f, symbols AS s WHERE c.file_id = f.id AND s.file_id = f.id AND c.func = 'setprofile' AND s.kind = 'class' AND f.nlines > 174"
+   },
+   {
+    "name": "t6_three_rare",
+    "note": "three way join over calls and symbols (rare)",
+    "tables": [
+     "calls",
+     "files",
+     "symbols"
+    ],
+    "sql": "SELECT count(*) FROM calls AS c, files AS f, symbols AS s WHERE c.file_id = f.id AND s.file_id = f.id AND c.func = '_utc_fold' AND s.kind = 'class' AND f.nlines > 174"
+   }
+  ]
+ },
+ "oracle_check": {
+  "pairs": 105,
+  "mismatches": 0,
+  "distinct_plan_sets": 5
+ },
+ "plan_bank": {
+  "cap_seconds": 1.0,
+  "per_query": {
+   "t1_callfile_hot": {
+    "plans": 12,
+    "timed": 5,
+    "censored": 7,
+    "best_ms": 9.907300000122632,
+    "worst_timed_ms": 36.50220000054105,
+    "chosen_was_forceable": true,
+    "answers": [
+     43220
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t1_callfile_mid": {
+    "plans": 12,
+    "timed": 4,
+    "censored": 8,
+    "best_ms": 0.04920000174024608,
+    "worst_timed_ms": 7.129900001018541,
+    "chosen_was_forceable": true,
+    "answers": [
+     25
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t1_callfile_rare": {
+    "plans": 12,
+    "timed": 4,
+    "censored": 8,
+    "best_ms": 0.031000001399661414,
+    "worst_timed_ms": 0.44129999878350645,
+    "chosen_was_forceable": true,
+    "answers": [
+     1
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t2_symcall_hot": {
+    "plans": 18,
+    "timed": 3,
+    "censored": 15,
+    "best_ms": 189.48589999854448,
+    "worst_timed_ms": 197.05489999978454,
+    "chosen_was_forceable": true,
+    "answers": [
+     266095
+    ],
+    "enumeration": {
+     "tried": 18,
+     "rejected": 0,
+     "distinct": 18
+    }
+   },
+   "t2_symcall_rare": {
+    "plans": 18,
+    "timed": 9,
+    "censored": 9,
+    "best_ms": 0.032300000384566374,
+    "worst_timed_ms": 7.0637999997416046,
+    "chosen_was_forceable": true,
+    "answers": [
+     0
+    ],
+    "enumeration": {
+     "tried": 18,
+     "rejected": 0,
+     "distinct": 18
+    }
+   },
+   "t3_impfile_hot": {
+    "plans": 12,
+    "timed": 8,
+    "censored": 4,
+    "best_ms": 0.36159999945084564,
+    "worst_timed_ms": 1.7373999999108491,
+    "chosen_was_forceable": true,
+    "answers": [
+     0
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t3_impfile_mid": {
+    "plans": 12,
+    "timed": 8,
+    "censored": 4,
+    "best_ms": 0.06519999988086056,
+    "worst_timed_ms": 1.649999998335261,
+    "chosen_was_forceable": true,
+    "answers": [
+     21
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t3_impfile_rare": {
+    "plans": 12,
+    "timed": 10,
+    "censored": 2,
+    "best_ms": 0.03130000004603062,
+    "worst_timed_ms": 1.507599999968079,
+    "chosen_was_forceable": true,
+    "answers": [
+     1
+    ],
+    "enumeration": {
+     "tried": 12,
+     "rejected": 0,
+     "distinct": 12
+    }
+   },
+   "t4_three_hot": {
+    "plans": 72,
+    "timed": 12,
+    "censored": 60,
+    "best_ms": 6.803099999160622,
+    "worst_timed_ms": 20.324999999502324,
+    "chosen_was_forceable": true,
+    "answers": [
+     12002
+    ],
+    "enumeration": {
+     "tried": 72,
+     "rejected": 0,
+     "distinct": 72
+    }
+   },
+   "t4_three_rare": {
+    "plans": 72,
+    "timed": 24,
+    "censored": 48,
+    "best_ms": 0.1812999998946907,
+    "worst_timed_ms": 8.212900000216905,
+    "chosen_was_forceable": true,
+    "answers": [
+     481
+    ],
+    "enumeration": {
+     "tried": 72,
+     "rejected": 0,
+     "distinct": 72
+    }
+   },
+   "t5_callimp_hot": {
+    "plans": 18,
+    "timed": 5,
+    "censored": 13,
+    "best_ms": 17.431700000088313,
+    "worst_timed_ms": 36.69179999997141,
+    "chosen_was_forceable": true,
+    "answers": [
+     0
+    ],
+    "enumeration": {
+     "tried": 18,
+     "rejected": 0,
+     "distinct": 18
+    }
+   },
+   "t5_callimp_rare": {
+    "plans": 18,
+    "timed": 9,
+    "censored": 9,
+    "best_ms": 0.03240000114601571,
+    "worst_timed_ms": 1.844300000811927,
+    "chosen_was_forceable": true,
+    "answers": [
+     0
+    ],
+    "enumeration": {
+     "tried": 18,
+     "rejected": 0,
+     "distinct": 18
+    }
+   },
+   "t5_callimp_mixed": {
+    "plans": 18,
+    "timed": 5,
+    "censored": 13,
+    "best_ms": 0.34950000008393545,
+    "worst_timed_ms": 9.72879999972065,
+    "chosen_was_forceable": true,
+    "answers": [
+     628
+    ],
+    "enumeration": {
+     "tried": 18,
+     "rejected": 0,
+     "distinct": 18
+    }
+   },
+   "t6_three_mid": {
+    "plans": 108,
+    "timed": 5,
+    "censored": 103,
+    "best_ms": 0.2855000002455199,
+    "worst_timed_ms": 7.665200000701589,
+    "chosen_was_forceable": true,
+    "answers": [
+     247
+    ],
+    "enumeration": {
+     "tried": 108,
+     "rejected": 0,
+     "distinct": 108
+    }
+   },
+   "t6_three_rare": {
+    "plans": 108,
+    "timed": 18,
+    "censored": 90,
+    "best_ms": 0.11219999942113645,
+    "worst_timed_ms": 9.538000000247848,
+    "chosen_was_forceable": true,
+    "answers": [
+     105
+    ],
+    "enumeration": {
+     "tried": 108,
+     "rejected": 0,
+     "distinct": 108
+    }
+   }
+  },
+  "unknown_plans_charged_cap": 23
+ },
+ "search": {
+  "seconds": 11.77,
+  "planner_calls": 264448,
+  "statistics_reloads": 55992,
+  "chosen_start": "ANALYZE",
+  "coordinates": 13,
+  "coordinates_changed": 3,
+  "logest_distance": 103,
+  "restarts": [
+   {
+    "start": "ANALYZE",
+    "predicted_ms": 225.59,
+    "distance": 103,
+    "moved": 3
+   },
+   {
+    "start": "all estimates = nrow",
+    "predicted_ms": 225.59,
+    "distance": 99,
+    "moved": 8
+   },
+   {
+    "start": "all estimates = 1",
+    "predicted_ms": 225.59,
+    "distance": 102,
+    "moved": 8
+   },
+   {
+    "start": "ANALYZE scaled 0.1",
+    "predicted_ms": 225.59,
+    "distance": 102,
+    "moved": 8
+   },
+   {
+    "start": "ANALYZE scaled 10",
+    "predicted_ms": 225.59,
+    "distance": 101,
+    "moved": 9
+   }
+  ],
+  "analyze_vector": {
+   "calls.ix_call_file": [
+    175
+   ],
+   "calls.ix_call_func": [
+    21
+   ],
+   "calls.ix_call_nargs": [
+    17255
+   ],
+   "files.ix_files_module": [
+    2
+   ],
+   "files.ix_files_nlines": [
+    3
+   ],
+   "files.ix_files_pkg": [
+    66
+   ],
+   "imports.ix_imp_file": [
+    9
+   ],
+   "imports.ix_imp_target": [
+    30
+   ],
+   "symbols.ix_sym_file": [
+    40
+   ],
+   "symbols.ix_sym_kind_name": [
+    29352,
+    2
+   ],
+   "symbols.ix_sym_name": [
+    2
+   ],
+   "symbols.ix_sym_nargs": [
+    3523
+   ]
+  },
+  "forged_vector": {
+   "calls.ix_call_file": [
+    11
+   ],
+   "calls.ix_call_func": [
+    41
+   ],
+   "calls.ix_call_nargs": [
+    17255
+   ],
+   "files.ix_files_module": [
+    2
+   ],
+   "files.ix_files_nlines": [
+    3
+   ],
+   "files.ix_files_pkg": [
+    66
+   ],
+   "imports.ix_imp_file": [
+    9
+   ],
+   "imports.ix_imp_target": [
+    30
+   ],
+   "symbols.ix_sym_file": [
+    1
+   ],
+   "symbols.ix_sym_kind_name": [
+    29352,
+    2
+   ],
+   "symbols.ix_sym_name": [
+    2
+   ],
+   "symbols.ix_sym_nargs": [
+    3523
+   ]
+  },
+  "predicted_ms": {
+   "no statistics": 4200.56,
+   "ANALYZE": 3018.29,
+   "best global rescale": 3017.99,
+   "global rescale factor": 0.02,
+   "uncoupled greedy expensive first": 3018.29,
+   "uncoupled greedy cheap first": 225.67,
+   "statforge": 225.59
+  }
+ },
+ "measured": {
+  "no statistics": {
+   "total_ms": 729.15,
+   "speedup_vs_analyze": 53.577,
+   "censored_queries": [],
+   "remeasured_without_deadline": [],
+   "per_query_ms": {
+    "t1_callfile_hot": 18.095,
+    "t1_callfile_mid": 0.165,
+    "t1_callfile_rare": 0.076,
+    "t2_symcall_hot": 211.801,
+    "t2_symcall_rare": 0.213,
+    "t3_impfile_hot": 0.685,
+    "t3_impfile_mid": 0.171,
+    "t3_impfile_rare": 0.06,
+    "t4_three_hot": 131.988,
+    "t4_three_rare": 131.658,
+    "t5_callimp_hot": 116.742,
+    "t5_callimp_rare": 0.125,
+    "t5_callimp_mixed": 116.668,
+    "t6_three_mid": 0.514,
+    "t6_three_rare": 0.188
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t2_symcall_rare": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH s USING INDEX ix_sym_nargs (nargs=?) ; 14<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t4_three_rare": "7<0 SEARCH s USING INDEX ix_sym_nargs (nargs=?) ; 14<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_mixed": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)"
+   }
+  },
+  "ANALYZE": {
+   "total_ms": 39065.4,
+   "speedup_vs_analyze": 1.0,
+   "censored_queries": [],
+   "remeasured_without_deadline": [
+    "t2_symcall_hot"
+   ],
+   "per_query_ms": {
+    "t1_callfile_hot": 17.435,
+    "t1_callfile_mid": 0.157,
+    "t1_callfile_rare": 0.073,
+    "t2_symcall_hot": 38794.065,
+    "t2_symcall_rare": 0.189,
+    "t3_impfile_hot": 0.745,
+    "t3_impfile_mid": 0.193,
+    "t3_impfile_rare": 0.062,
+    "t4_three_hot": 7.462,
+    "t4_three_rare": 0.303,
+    "t5_callimp_hot": 120.987,
+    "t5_callimp_rare": 0.127,
+    "t5_callimp_mixed": 122.832,
+    "t6_three_mid": 0.562,
+    "t6_three_rare": 0.213
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_func (func=?)",
+    "t2_symcall_rare": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_func (func=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 15<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 15<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t5_callimp_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_mixed": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)"
+   }
+  },
+  "best global rescale": {
+   "total_ms": 1652.65,
+   "speedup_vs_analyze": 23.638,
+   "censored_queries": [],
+   "remeasured_without_deadline": [],
+   "per_query_ms": {
+    "t1_callfile_hot": 18.147,
+    "t1_callfile_mid": 0.171,
+    "t1_callfile_rare": 0.083,
+    "t2_symcall_hot": 1383.433,
+    "t2_symcall_rare": 0.181,
+    "t3_impfile_hot": 0.792,
+    "t3_impfile_mid": 0.243,
+    "t3_impfile_rare": 0.065,
+    "t4_three_hot": 7.441,
+    "t4_three_rare": 0.267,
+    "t5_callimp_hot": 119.494,
+    "t5_callimp_rare": 0.117,
+    "t5_callimp_mixed": 121.615,
+    "t6_three_mid": 0.444,
+    "t6_three_rare": 0.156
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t2_symcall_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t5_callimp_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t5_callimp_mixed": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)"
+   }
+  },
+  "uncoupled greedy, expensive first": {
+   "total_ms": 61043.5,
+   "speedup_vs_analyze": 0.64,
+   "censored_queries": [],
+   "remeasured_without_deadline": [
+    "t2_symcall_hot"
+   ],
+   "per_query_ms": {
+    "t1_callfile_hot": 18.469,
+    "t1_callfile_mid": 0.16,
+    "t1_callfile_rare": 0.076,
+    "t2_symcall_hot": 49530.333,
+    "t2_symcall_rare": 0.188,
+    "t3_impfile_hot": 0.757,
+    "t3_impfile_mid": 0.179,
+    "t3_impfile_rare": 0.064,
+    "t4_three_hot": 8.108,
+    "t4_three_rare": 0.304,
+    "t5_callimp_hot": 11462.461,
+    "t5_callimp_rare": 0.129,
+    "t5_callimp_mixed": 21.599,
+    "t6_three_mid": 0.481,
+    "t6_three_rare": 0.193
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH s USING INDEX ix_sym_name (name=?)",
+    "t2_symcall_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH s USING INDEX ix_sym_name (name=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 15<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 15<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t5_callimp_hot": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_target (target=?)",
+    "t5_callimp_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_target (target=?)",
+    "t5_callimp_mixed": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_target (target=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)"
+   }
+  },
+  "uncoupled greedy, cheap first": {
+   "total_ms": 258.37,
+   "speedup_vs_analyze": 151.198,
+   "censored_queries": [],
+   "remeasured_without_deadline": [],
+   "per_query_ms": {
+    "t1_callfile_hot": 17.543,
+    "t1_callfile_mid": 0.161,
+    "t1_callfile_rare": 0.074,
+    "t2_symcall_hot": 211.661,
+    "t2_symcall_rare": 0.225,
+    "t3_impfile_hot": 0.719,
+    "t3_impfile_mid": 0.166,
+    "t3_impfile_rare": 0.061,
+    "t4_three_hot": 7.353,
+    "t4_three_rare": 0.309,
+    "t5_callimp_hot": 18.624,
+    "t5_callimp_rare": 0.436,
+    "t5_callimp_mixed": 0.402,
+    "t6_three_mid": 0.447,
+    "t6_three_rare": 0.19
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t2_symcall_rare": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t5_callimp_hot": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t5_callimp_mixed": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 17<0 SEARCH s USING INDEX ix_sym_file (file_id=?)"
+   }
+  },
+  "statforge": {
+   "total_ms": 266.09,
+   "speedup_vs_analyze": 146.811,
+   "censored_queries": [],
+   "remeasured_without_deadline": [],
+   "per_query_ms": {
+    "t1_callfile_hot": 19.596,
+    "t1_callfile_mid": 0.17,
+    "t1_callfile_rare": 0.085,
+    "t2_symcall_hot": 218.179,
+    "t2_symcall_rare": 0.228,
+    "t3_impfile_hot": 0.745,
+    "t3_impfile_mid": 0.191,
+    "t3_impfile_rare": 0.068,
+    "t4_three_hot": 7.437,
+    "t4_three_rare": 0.286,
+    "t5_callimp_hot": 17.719,
+    "t5_callimp_rare": 0.442,
+    "t5_callimp_mixed": 0.388,
+    "t6_three_mid": 0.385,
+    "t6_three_rare": 0.175
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t2_symcall_rare": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t5_callimp_hot": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t5_callimp_mixed": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)"
+   }
+  },
+  "per-query hints (rewrites SQL)": {
+   "total_ms": 255.64,
+   "speedup_vs_analyze": 152.813,
+   "censored_queries": [],
+   "remeasured_without_deadline": [],
+   "per_query_ms": {
+    "t1_callfile_hot": 18.442,
+    "t1_callfile_mid": 0.161,
+    "t1_callfile_rare": 0.078,
+    "t2_symcall_hot": 208.503,
+    "t2_symcall_rare": 0.154,
+    "t3_impfile_hot": 0.731,
+    "t3_impfile_mid": 0.204,
+    "t3_impfile_rare": 0.073,
+    "t4_three_hot": 7.411,
+    "t4_three_rare": 0.282,
+    "t5_callimp_hot": 18.517,
+    "t5_callimp_rare": 0.087,
+    "t5_callimp_mixed": 0.416,
+    "t6_three_mid": 0.398,
+    "t6_three_rare": 0.186
+   },
+   "plans": {
+    "t1_callfile_hot": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_mid": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t1_callfile_rare": "5<0 SEARCH c USING INDEX ix_call_func (func=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t2_symcall_hot": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t2_symcall_rare": "6<0 SEARCH s USING INDEX ix_sym_name (name=?) ; 11<0 SEARCH c USING INDEX ix_call_func (func=?)",
+    "t3_impfile_hot": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t3_impfile_mid": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING COVERING INDEX ix_files_pkg (pkg=? AND rowid=?)",
+    "t3_impfile_rare": "5<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 10<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_hot": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 25<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t4_three_rare": "7<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 12<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?) ; 15<0 SEARCH s USING INDEX ix_sym_file (file_id=?)",
+    "t5_callimp_hot": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t5_callimp_rare": "6<0 SEARCH c USING INDEX ix_call_func (func=?) ; 11<0 SEARCH i USING INDEX ix_imp_target (target=?)",
+    "t5_callimp_mixed": "6<0 SEARCH i USING INDEX ix_imp_target (target=?) ; 11<0 SEARCH c USING INDEX ix_call_file (file_id=?)",
+    "t6_three_mid": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)",
+    "t6_three_rare": "7<0 SEARCH c USING INDEX ix_call_func (func=?) ; 12<0 SEARCH s USING INDEX ix_sym_file (file_id=?) ; 23<0 SEARCH f USING INTEGER PRIMARY KEY (rowid=?)"
+   }
+  }
+ },
+ "headline": {
+  "metric": "total measured time for the 15 query workload",
+  "baseline_label": "ANALYZE",
+  "baseline_ms": 39065.4,
+  "result_label": "statforge",
+  "result_ms": 266.09,
+  "speedup": 146.81,
+  "per_query_hint_floor_ms": 255.64,
+  "rounds": 5,
+  "deadline_seconds": 12.0
+ }
+}

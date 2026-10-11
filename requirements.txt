@@ -1,0 +1,3 @@
+# sqlite3, ast and sysconfig are part of the standard library, so the only
+# third party dependency is the plotting library used for docs/before_after.png.
+matplotlib>=3.7

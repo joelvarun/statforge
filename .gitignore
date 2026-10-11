@@ -1,0 +1,18 @@
+# Generated corpus and cached plan timings. The corpus is rebuilt from the
+# local Python install on first run, so it is never worth committing.
+.cache/
+*.db
+*.db.partial
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+.idea/
+.vscode/
+.DS_Store
